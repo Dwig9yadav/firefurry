@@ -124,7 +124,7 @@ const StudentDashboard = () => {
       setUserName(user.name);
       setEditName(user.name);
       setSelectedAvatar(user.avatar || 'male');
-      
+
       // Load all data independently
       setLoadingRecommendations(true);
       const recommendationPromise = typeof ragAPI.getRecommendations === 'function'
@@ -360,7 +360,7 @@ const StudentDashboard = () => {
 
         <div className="sidebar-footer">
           <div className="user-profile">
-            <img 
+            <img
               src={getAvatarSrc(selectedAvatar)}
               alt={selectedAvatar}
               className="avatar-image"
@@ -371,7 +371,7 @@ const StudentDashboard = () => {
               <p className="user-id">{currentUser?.institution_id || ''}</p>
             </div>
           </div>
-          <button 
+          <button
             className="edit-profile-btn"
             onClick={() => setShowProfileModal(true)}
           >
@@ -388,7 +388,7 @@ const StudentDashboard = () => {
         <div className="modal-overlay" onClick={() => setShowProfileModal(false)}>
           <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Edit Your Profile</h3>
-            
+
             <div className="profile-form">
               <div className="form-group-modal">
                 <label>Your Name</label>
@@ -404,14 +404,14 @@ const StudentDashboard = () => {
               <div className="form-group-modal">
                 <label>Choose Avatar</label>
                 <div className="avatar-options-modal">
-                  <button 
+                  <button
                     className={`avatar-option ${selectedAvatar === 'male' ? 'selected' : ''}`}
                     onClick={() => setSelectedAvatar('male')}
                   >
                     <img src="/images/male.png" alt="Male" className="modal-avatar-img" onError={handleAvatarError} />
                     <p>Male</p>
                   </button>
-                  <button 
+                  <button
                     className={`avatar-option ${selectedAvatar === 'female' ? 'selected' : ''}`}
                     onClick={() => setSelectedAvatar('female')}
                   >
@@ -423,7 +423,7 @@ const StudentDashboard = () => {
             </div>
 
             <div className="profile-modal-buttons">
-              <button 
+              <button
                 className="save-profile-btn"
                 onClick={async () => {
                   try {
@@ -441,7 +441,7 @@ const StudentDashboard = () => {
               >
                 Save Changes
               </button>
-              <button 
+              <button
                 className="close-modal-btn"
                 onClick={() => {
                   setEditName(userName);
@@ -568,7 +568,7 @@ const StudentDashboard = () => {
               <div className="buddies-grid">
                 {filteredBuddies.length > 0 ? filteredBuddies.map((buddy) => (
                   <div key={buddy.id} className="buddy-card">
-                    <img 
+                    <img
                       src={getAvatarSrc(buddy.avatar)}
                       alt={buddy.avatar || 'male'}
                       className="buddy-avatar-img"
@@ -603,9 +603,9 @@ const StudentDashboard = () => {
                 <div className="form-group">
                   <label>Show your name to teacher/admin?</label>
                   <div className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      id="identity-toggle" 
+                    <input
+                      type="checkbox"
+                      id="identity-toggle"
                       checked={!isAnonymous}
                       onChange={(e) => setIsAnonymous(!e.target.checked)}
                     />

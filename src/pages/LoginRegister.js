@@ -50,7 +50,7 @@ const LoginRegister = () => {
       if (isLogin) {
         const response = await authAPI.login(formData.institutionId, formData.password);
         const user = response.user;
-        
+
         if (user.role === 'admin') {
           navigate('/admin-dashboard');
         } else if (user.role === 'teacher') {
@@ -131,13 +131,13 @@ const LoginRegister = () => {
 
         <div className="auth-box">
           <div className="form-toggle">
-            <button 
+            <button
               className={`toggle-btn ${isLogin ? 'active' : ''}`}
               onClick={() => !isLogin && toggleMode()}
             >
               Login
             </button>
-            <button 
+            <button
               className={`toggle-btn ${!isLogin ? 'active' : ''}`}
               onClick={() => isLogin && toggleMode()}
             >
@@ -148,7 +148,7 @@ const LoginRegister = () => {
           <form onSubmit={handleSubmit} className="auth-form">
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
-            
+
             {!isLogin && (
               <div className="form-group">
                 <label htmlFor="name">Full Name</label>
@@ -255,7 +255,7 @@ const LoginRegister = () => {
           <div className="form-footer">
             <p>
               {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button 
+              <button
                 type="button"
                 className="toggle-link"
                 onClick={toggleMode}
@@ -266,7 +266,7 @@ const LoginRegister = () => {
           </div>
         </div>
 
-        <button 
+        <button
           className="back-btn"
           onClick={() => navigate('/')}
         >

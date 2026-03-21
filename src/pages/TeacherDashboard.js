@@ -25,34 +25,34 @@ const TeacherDashboard = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [operationStatus, setOperationStatus] = useState('');
-  
+
   // User data
   const [currentUser, setCurrentUser] = useState(null);
   const [userName, setUserName] = useState('');
   const [editName, setEditName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('male');
-  
+
   // Teachers from API
   const [teachers, setTeachers] = useState([]);
   const [teacherSearch, setTeacherSearch] = useState("");
-  
+
   // Student analysis from API
   const [studentProblems, setStudentProblems] = useState([]);
-  
+
   // Feedback
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackCategory, setFeedbackCategory] = useState('rag');
   const [myFeedback, setMyFeedback] = useState([]);
   const [studentFeedbackList, setStudentFeedbackList] = useState([]);
-  
+
   // Analytics
   const [analytics, setAnalytics] = useState(null);
-  
+
   // PDFs
   const [pdfs, setPdfs] = useState([]);
   const [uploadingPDF, setUploadingPDF] = useState(false);
   const [indexingPDF, setIndexingPDF] = useState(null);
-  
+
   // Search history
   const [searchHistory, setSearchHistory] = useState([]);
 
@@ -76,7 +76,7 @@ const TeacherDashboard = () => {
       setUserName(user.name);
       setEditName(user.name);
       setSelectedAvatar(user.avatar || 'male');
-      
+
       // Load all data independently — one failure must not block others
       const results = await Promise.allSettled([
         usersAPI.getTeachers(),
@@ -202,7 +202,7 @@ const TeacherDashboard = () => {
   return (
     <div className="teacher-dashboard">
       <AnimatedBackground />
-      
+
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -266,7 +266,7 @@ const TeacherDashboard = () => {
 
         <div className="sidebar-footer">
           <div className="user-profile">
-            <img 
+            <img
               src={getAvatarSrc(selectedAvatar)}
               alt={selectedAvatar}
               className="avatar-image"
@@ -277,7 +277,7 @@ const TeacherDashboard = () => {
               <p className="user-id">Teacher ID: {currentUser?.institution_id || ''}</p>
             </div>
           </div>
-          <button 
+          <button
             className="edit-profile-btn"
             onClick={() => setShowProfileModal(true)}
           >
@@ -294,7 +294,7 @@ const TeacherDashboard = () => {
         <div className="modal-overlay" onClick={() => setShowProfileModal(false)}>
           <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Edit Your Profile</h3>
-            
+
             <div className="profile-form">
               <div className="form-group-modal">
                 <label>Your Name</label>
@@ -310,14 +310,14 @@ const TeacherDashboard = () => {
               <div className="form-group-modal">
                 <label>Choose Avatar</label>
                 <div className="avatar-options-modal">
-                  <button 
+                  <button
                     className={`avatar-option ${selectedAvatar === 'male' ? 'selected' : ''}`}
                     onClick={() => setSelectedAvatar('male')}
                   >
                     <img src="/images/male.png" alt="Male" className="modal-avatar-img" onError={handleAvatarError} />
                     <p>Male</p>
                   </button>
-                  <button 
+                  <button
                     className={`avatar-option ${selectedAvatar === 'female' ? 'selected' : ''}`}
                     onClick={() => setSelectedAvatar('female')}
                   >
@@ -329,7 +329,7 @@ const TeacherDashboard = () => {
             </div>
 
             <div className="profile-modal-buttons">
-              <button 
+              <button
                 className="save-profile-btn"
                 onClick={async () => {
                   try {
@@ -347,7 +347,7 @@ const TeacherDashboard = () => {
               >
                 Save Changes
               </button>
-              <button 
+              <button
                 className="cancel-profile-btn"
                 onClick={() => {
                   setEditName(userName);
@@ -384,7 +384,7 @@ const TeacherDashboard = () => {
             <section className="tab-content">
               <h2>🔍 RAG Search - Student PDFs & Materials</h2>
               <p className="section-desc">Search across all student-uploaded PDFs and course materials using RAG</p>
-              
+
               <div className="search-container">
                 <div className="search-box">
                   <input
@@ -481,17 +481,17 @@ const TeacherDashboard = () => {
             <section className="tab-content">
               <h2>📄 PDF Upload & Management</h2>
               <p className="section-desc">Upload course materials and PDFs for RAG indexing</p>
-              
+
               <div className="pdf-upload-section">
                 <div className="upload-area">
                   <span className="upload-icon">📤</span>
                   <h3>Upload New PDF</h3>
                   <p>Upload course notes, question papers, or study materials</p>
                   <label className="upload-btn-label">
-                    <input 
-                      type="file" 
-                      accept=".pdf" 
-                      onChange={handleUploadPDF} 
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleUploadPDF}
                       disabled={uploadingPDF}
                       style={{display: 'none'}}
                     />
@@ -529,7 +529,7 @@ const TeacherDashboard = () => {
                     <span className="date-cell">{pdf.created_at ? new Date(pdf.created_at).toLocaleDateString() : '--'}</span>
                     <div className="actions-cell">
                       {pdf.status !== 'indexed' && (
-                        <button 
+                        <button
                           className="index-btn"
                           onClick={() => handleIndexPDF(pdf.id)}
                           disabled={indexingPDF === pdf.id}
@@ -537,7 +537,7 @@ const TeacherDashboard = () => {
                           {indexingPDF === pdf.id ? '⏳ Indexing...' : '🔄 Index'}
                         </button>
                       )}
-                      <button 
+                      <button
                         className="delete-btn"
                         onClick={() => handleDeletePDF(pdf.id, pdf.filename)}
                         title="Delete PDF"
@@ -560,11 +560,11 @@ const TeacherDashboard = () => {
             <section className="tab-content">
               <h2>👥 Faculty Members</h2>
               <p className="section-desc">View other teachers in your institution</p>
-              
+
               <div className="teachers-grid">
                 {filteredTeachers.length > 0 ? filteredTeachers.map((teacher) => (
                   <div key={teacher.id} className="teacher-card">
-                    <img 
+                    <img
                       src={getAvatarSrc(teacher.avatar)}
                       alt={teacher.name}
                       className="teacher-avatar-img"
@@ -588,7 +588,7 @@ const TeacherDashboard = () => {
             <section className="tab-content">
               <h2>📊 Student Problem Analysis (RAG Insights)</h2>
               <p className="section-desc">Analyze student learning patterns based on RAG search data</p>
-              
+
               <div className="analysis-stats">
                 <div className="stat-card">
                   <span className="stat-icon">�</span>
@@ -667,7 +667,7 @@ const TeacherDashboard = () => {
           {activeTab === 'feedback' && (
             <section className="tab-content">
               <h2>💬 Send Feedback to Admin</h2>
-              
+
               <div className="feedback-notice">
                 <span className="notice-icon">ℹ️</span>
                 <p>Your feedback will be sent with your identity visible to the admin for proper follow-up.</p>
@@ -675,7 +675,7 @@ const TeacherDashboard = () => {
 
               <div className="feedback-form">
                 <div className="sender-info">
-                  <img 
+                  <img
                     src={getAvatarSrc(selectedAvatar)}
                     alt="Your avatar"
                     className="sender-avatar"

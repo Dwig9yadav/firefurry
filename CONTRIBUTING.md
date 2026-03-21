@@ -42,7 +42,7 @@ If your change touches RAG logic, include before/after behavior notes in the PR 
 ## Commit Message Guide
 Use these prefixes for clean commits:
 - `feat:` — new feature
-- `fix:` — bug fix  
+- `fix:` — bug fix
 - `docs:` — documentation changes
 - `test:` — adding tests
 - `refactor:` — code refactoring
@@ -55,8 +55,8 @@ Example: `feat: add support for DOCX file upload`
 - For features: explain the use case and why it would help
 
 ## Code Style
-**Python:** Follow PEP8, add docstrings to all functions  
-**JavaScript:** Use camelCase, add JSDoc comments to key functions  
+**Python:** Follow PEP8, add docstrings to all functions
+**JavaScript:** Use camelCase, add JSDoc comments to key functions
 **General:** Keep functions small and single-purpose; prefer extracting duplicate logic into shared helpers/hooks
 
 ## Code of Conduct

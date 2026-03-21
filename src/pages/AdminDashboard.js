@@ -47,14 +47,14 @@ const AdminDashboard = () => {
 
   // Users from API
   const [users, setUsers] = useState([]);
-  
+
   // Feedback from API
   const [teacherFeedback, setTeacherFeedback] = useState([]);
   const [studentFeedbackList, setStudentFeedbackList] = useState([]);
-  
+
   // Analytics from API
   const [analytics, setAnalytics] = useState(null);
-  
+
   // PDFs from API
   const [pdfs, setPdfs] = useState([]);
   const [uploadingPDF, setUploadingPDF] = useState(false);
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
       setUserName(user.name);
       setEditName(user.name);
       setSelectedAvatar(user.avatar || 'male');
-      
+
       // Load all data independently — one failure must not block others
       const results = await Promise.allSettled([
         usersAPI.getAll(),
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
   const handleRoleChange = async (userId, newRole) => {
     try {
       await usersAPI.updateRole(userId, newRole);
-      setUsers(users.map(user => 
+      setUsers(users.map(user =>
         user.id === userId ? { ...user, role: newRole } : user
       ));
       setOperationStatus(`Role updated to ${newRole}.`);
@@ -260,7 +260,7 @@ const AdminDashboard = () => {
   return (
     <div className="admin-dashboard">
       <AnimatedBackground />
-      
+
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -324,7 +324,7 @@ const AdminDashboard = () => {
 
         <div className="sidebar-footer">
           <div className="user-profile">
-            <img 
+            <img
               src={getAvatarSrc(selectedAvatar)}
               alt={selectedAvatar}
               className="avatar-image"
@@ -335,7 +335,7 @@ const AdminDashboard = () => {
               <p className="user-id">Admin ID: {currentUser?.institution_id || ''}</p>
             </div>
           </div>
-          <button 
+          <button
             className="edit-profile-btn"
             onClick={() => setShowProfileModal(true)}
           >
@@ -352,7 +352,7 @@ const AdminDashboard = () => {
         <div className="modal-overlay" onClick={() => setShowProfileModal(false)}>
           <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Edit Your Profile</h3>
-            
+
             <div className="profile-form">
               <div className="form-group-modal">
                 <label>Your Name</label>
@@ -368,14 +368,14 @@ const AdminDashboard = () => {
               <div className="form-group-modal">
                 <label>Choose Avatar</label>
                 <div className="avatar-options-modal">
-                  <button 
+                  <button
                     className={`avatar-option ${selectedAvatar === 'male' ? 'selected' : ''}`}
                     onClick={() => setSelectedAvatar('male')}
                   >
                     <img src="/images/male.png" alt="Male" className="modal-avatar-img" onError={handleAvatarError} />
                     <p>Male</p>
                   </button>
-                  <button 
+                  <button
                     className={`avatar-option ${selectedAvatar === 'female' ? 'selected' : ''}`}
                     onClick={() => setSelectedAvatar('female')}
                   >
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="profile-modal-buttons">
-              <button 
+              <button
                 className="save-profile-btn"
                 onClick={async () => {
                   try {
@@ -405,7 +405,7 @@ const AdminDashboard = () => {
               >
                 Save Changes
               </button>
-              <button 
+              <button
                 className="cancel-profile-btn"
                 onClick={() => {
                   setEditName(userName);
@@ -442,12 +442,12 @@ const AdminDashboard = () => {
             <section className="tab-content">
               <h2>👥 User Management</h2>
               <p className="section-desc">Manage users, change roles, and delete accounts</p>
-              
+
               <div className="user-controls">
                 <div className="filter-group">
                   <label>Filter by Role:</label>
-                  <select 
-                    value={userFilter} 
+                  <select
+                    value={userFilter}
                     onChange={(e) => setUserFilter(e.target.value)}
                     className="filter-select"
                   >
@@ -475,7 +475,7 @@ const AdminDashboard = () => {
                 {filteredUsers.map((user) => (
                   <div key={user.id} className="table-row">
                     <div className="user-cell">
-                      <img 
+                      <img
                         src={getAvatarSrc(user.avatar)}
                         alt={user.name}
                         className="table-avatar"
@@ -491,7 +491,7 @@ const AdminDashboard = () => {
                       {user.status === 'active' ? '🟢' : '🔴'} {user.status}
                     </span>
                     <div className="actions-cell">
-                      <select 
+                      <select
                         className="role-select"
                         value={user.role}
                         onChange={(e) => handleRoleChange(user.id, e.target.value)}
@@ -500,7 +500,7 @@ const AdminDashboard = () => {
                         <option value="teacher">Teacher</option>
                         <option value="admin">Admin</option>
                       </select>
-                      <button 
+                      <button
                         className="delete-btn"
                         onClick={() => handleDeleteUser(user.id)}
                         title="Delete User"
@@ -519,7 +519,7 @@ const AdminDashboard = () => {
             <section className="tab-content">
               <h2>💬 Teacher Feedback</h2>
               <p className="section-desc">View and manage feedback from teachers (non-anonymous)</p>
-              
+
               <div className="feedback-stats">
                 <div className="feedback-stat-card">
                   <span className="stat-number">{teacherFeedback.length}</span>
@@ -539,7 +539,7 @@ const AdminDashboard = () => {
                 {teacherFeedback.length > 0 ? teacherFeedback.map((feedback) => (
                   <div key={feedback.id} className="feedback-card">
                     <div className="feedback-sender">
-                      <img 
+                      <img
                         src={getAvatarSrc(feedback.sender_avatar)}
                         alt={feedback.sender_name}
                         className="feedback-avatar"
@@ -567,7 +567,7 @@ const AdminDashboard = () => {
                     </div>
                     {feedback.status === 'pending' && (
                       <div className="feedback-actions">
-                        <button 
+                        <button
                           className="respond-btn"
                           onClick={() => {
                             const response = prompt('Enter your response:');
@@ -623,7 +623,7 @@ const AdminDashboard = () => {
             <section className="tab-content">
               <h2>🔍 RAG Search - System Wide</h2>
               <p className="section-desc">Search across all PDFs and content in the system</p>
-              
+
               <div className="search-container">
                 <div className="search-box">
                   <input
@@ -712,17 +712,17 @@ const AdminDashboard = () => {
             <section className="tab-content">
               <h2>📄 PDF Management</h2>
               <p className="section-desc">Upload, index, and manage course PDFs for RAG search</p>
-              
+
               <div className="pdf-upload-section">
                 <div className="upload-area">
                   <span className="upload-icon">📤</span>
                   <h3>Upload New PDF</h3>
                   <p>Upload course materials, notes, or question papers</p>
                   <label className="upload-btn-label">
-                    <input 
-                      type="file" 
-                      accept=".pdf" 
-                      onChange={handleUploadPDF} 
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleUploadPDF}
                       disabled={uploadingPDF}
                       style={{display: 'none'}}
                     />
@@ -760,7 +760,7 @@ const AdminDashboard = () => {
                     <span className="date-cell">{pdf.created_at ? new Date(pdf.created_at).toLocaleDateString() : '--'}</span>
                     <div className="actions-cell">
                       {pdf.status !== 'indexed' && (
-                        <button 
+                        <button
                           className="index-btn"
                           onClick={() => handleIndexPDF(pdf.id)}
                           disabled={indexingPDF === pdf.id}
@@ -768,7 +768,7 @@ const AdminDashboard = () => {
                           {indexingPDF === pdf.id ? '⏳ Indexing...' : '🔄 Index'}
                         </button>
                       )}
-                      <button 
+                      <button
                         className="delete-btn"
                         onClick={() => handleDeletePDF(pdf.id, pdf.filename)}
                         title="Delete PDF"
@@ -791,7 +791,7 @@ const AdminDashboard = () => {
             <section className="tab-content">
               <h2>📊 System Analytics</h2>
               <p className="section-desc">Overview of RAG system performance and usage</p>
-              
+
               <div className="analytics-stats">
                 <div className="analytics-card">
                   <span className="analytics-icon">📈</span>

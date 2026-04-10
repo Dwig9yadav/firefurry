@@ -54,6 +54,12 @@ const AdminDashboard = () => {
 
   // Analytics from API
   const [analytics, setAnalytics] = useState(null);
+  const [feedbackSentiment, setFeedbackSentiment] = useState({
+    total: 0,
+    positive_percentage: 0,
+    negative_percentage: 0,
+    neutral_percentage: 0,
+  });
 
   // PDFs from API
   const [pdfs, setPdfs] = useState([]);
@@ -88,6 +94,7 @@ const AdminDashboard = () => {
         analyticsAPI.getSummary(),
         ragAPI.getPDFs(),
         studentFeedbackAPI.getAll(),
+        analyticsAPI.getFeedbackSentiment(),
       ]);
 
       if (results[0].status === 'fulfilled') setUsers(results[0].value || []);
@@ -104,6 +111,15 @@ const AdminDashboard = () => {
 
       if (results[4].status === 'fulfilled') setStudentFeedbackList(results[4].value || []);
       else setOperationStatus('Unable to load student feedback right now.');
+
+      if (results[5].status === 'fulfilled') {
+        setFeedbackSentiment(results[5].value || {
+          total: 0,
+          positive_percentage: 0,
+          negative_percentage: 0,
+          neutral_percentage: 0,
+        });
+      }
     } catch (error) {
       handleError(error, 'Failed to load dashboard data.');
     } finally {
@@ -594,6 +610,8 @@ const AdminDashboard = () => {
                 <span className="stat-pill">📬 {studentFeedbackList.length} Total</span>
                 <span className="stat-pill student">🕵️ {studentFeedbackList.filter(f => f.is_anonymous).length} Anonymous</span>
                 <span className="stat-pill teacher">👤 {studentFeedbackList.filter(f => !f.is_anonymous).length} Identified</span>
+                <span className="stat-pill">✅ {feedbackSentiment?.positive_percentage || 0}% Positive</span>
+                <span className="stat-pill">⚠️ {feedbackSentiment?.negative_percentage || 0}% Negative</span>
               </div>
 
               <div className="feedback-list" style={{marginTop: '1.5rem'}}>

@@ -130,3 +130,48 @@ class TestMe:
                        os.getenv("JWT_SECRET", TEST_JWT_SECRET), algorithm="HS256")
         r = _client.get("/api/auth/me", headers={"Authorization": f"Bearer {tok}"})
         assert r.status_code == 401
+
+
+class TestPasswordReset:
+    def test_forgot_password_returns_reset_link(self):
+        _set(data=[_user()])
+        response = _client.post("/api/auth/forgot-password", json={"email": "student@t.com"})
+        assert response.status_code == 200
+        payload = response.json()
+        assert "message" in payload
+        assert "reset_url" in payload
+        assert "reset_token=" in payload["reset_url"]
+
+    def test_reset_password_updates_hash(self):
+        _set(data=[_user()])
+        _mock_sb.table.return_value.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[_user(pw="newpass123")])
+
+        forgot = _client.post("/api/auth/forgot-password", json={"email": "student@t.com"})
+        assert forgot.status_code == 200
+        from urllib.parse import urlparse, parse_qs
+
+        reset_url = forgot.json()["reset_url"]
+        token = parse_qs(urlparse(reset_url).query)["reset_token"][0]
+
+        response = _client.post(
+            "/api/auth/reset-password",
+            json={"token": token, "new_password": "newpass123"},
+        )
+        assert response.status_code == 200
+        assert "Password reset successful" in response.json()["message"]
+
+    def test_change_password_updates_hash(self):
+        _set(data=[_user()])
+        _mock_sb.table.return_value.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[_user(pw="changed123")])
+
+        login = _client.post("/api/auth/login", json={"institution_id": "student001", "password": TEST_PASSWORD})
+        assert login.status_code == 200
+        token = login.json()["access_token"]
+
+        response = _client.post(
+            "/api/auth/change-password",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"current_password": TEST_PASSWORD, "new_password": "changed123"},
+        )
+        assert response.status_code == 200
+        assert "Password changed successfully" in response.json()["message"]

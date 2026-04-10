@@ -44,6 +44,12 @@ const TeacherDashboard = () => {
   const [feedbackCategory, setFeedbackCategory] = useState('rag');
   const [myFeedback, setMyFeedback] = useState([]);
   const [studentFeedbackList, setStudentFeedbackList] = useState([]);
+  const [feedbackSentiment, setFeedbackSentiment] = useState({
+    total: 0,
+    positive_percentage: 0,
+    negative_percentage: 0,
+    neutral_percentage: 0,
+  });
 
   // Analytics
   const [analytics, setAnalytics] = useState(null);
@@ -86,6 +92,7 @@ const TeacherDashboard = () => {
         ragAPI.getPDFs(),
         ragAPI.getSearchHistory(),
         studentFeedbackAPI.getAll(),
+        analyticsAPI.getFeedbackSentiment(),
       ]);
 
       if (results[0].status === 'fulfilled') {
@@ -98,6 +105,14 @@ const TeacherDashboard = () => {
       if (results[4].status === 'fulfilled') setPdfs(results[4].value || []);
       if (results[5].status === 'fulfilled') setSearchHistory(results[5].value || []);
       if (results[6].status === 'fulfilled') setStudentFeedbackList(results[6].value || []);
+      if (results[7].status === 'fulfilled') {
+        setFeedbackSentiment(results[7].value || {
+          total: 0,
+          positive_percentage: 0,
+          negative_percentage: 0,
+          neutral_percentage: 0,
+        });
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -746,6 +761,8 @@ const TeacherDashboard = () => {
                 <span className="stat-pill">📬 {studentFeedbackList.length} Total</span>
                 <span className="stat-pill student">🕵️ {studentFeedbackList.filter(f => f.is_anonymous).length} Anonymous</span>
                 <span className="stat-pill teacher">👤 {studentFeedbackList.filter(f => !f.is_anonymous).length} Identified</span>
+                <span className="stat-pill">✅ {feedbackSentiment?.positive_percentage || 0}% Positive</span>
+                <span className="stat-pill">⚠️ {feedbackSentiment?.negative_percentage || 0}% Negative</span>
               </div>
 
               <div className="feedback-history">

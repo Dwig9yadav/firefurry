@@ -394,7 +394,7 @@ Use these docs after deployment to verify every endpoint and schema contract.
 
 ## 🗺️ Future Roadmap
 
-- [ ] 🔑 **Forgot Password** — email OTP-based password reset flow
+- [x] 🔑 **Forgot Password** — email reset link flow
 - [ ] 🔐 Google OAuth integration
 - [ ] 📱 Mobile-responsive optimization
 - [ ] 🌐 Real-time collaboration features

@@ -14,11 +14,11 @@ Follow these steps to set up EduRag locally:
    ```
 3. **Install frontend dependencies:**
    ```bash
-   cd ../src
+   cd ..
    npm install
    ```
 4. **Configure environment variables:**
-   - Copy `.env.example` to `.env` in both backend and frontend folders and fill in required values.
+   - Copy `.env.example` to `.env` in the backend folder and fill in required values.
 5. **Run the backend server:**
    ```bash
    cd backend
@@ -26,7 +26,7 @@ Follow these steps to set up EduRag locally:
    ```
 6. **Run the frontend app:**
    ```bash
-   cd ../src
+   cd ..
    npm start
    ```
 7. **Access the app:**

@@ -45,11 +45,13 @@ _main._ip_buckets = defaultdict(lambda: deque())
 # Patch get_supabase in every router that imported it
 import routers.auth as _ra
 import routers.feedback as _rf
+import routers.analytics as _ran
 import routers.student_feedback as _rsf
 import routers.rag as _rrag
 
 _ra.get_supabase = fake_get_supabase
 _rf.get_supabase = fake_get_supabase
+_ran.get_supabase = fake_get_supabase
 _rsf.get_supabase = fake_get_supabase
 _rrag.get_supabase = fake_get_supabase
 

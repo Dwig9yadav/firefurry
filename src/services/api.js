@@ -162,6 +162,33 @@ export const authAPI = {
         });
     },
 
+    forgotPassword: async (email) => {
+        return apiFetch('/auth/forgot-password', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+    },
+
+    resetPassword: async (token, newPassword) => {
+        return apiFetch('/auth/reset-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                token,
+                new_password: newPassword,
+            }),
+        });
+    },
+
+    changePassword: async (currentPassword, newPassword) => {
+        return apiFetch('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword,
+            }),
+        });
+    },
+
     logout: () => {
         removeToken();
         removeUser();
@@ -416,6 +443,10 @@ export const analyticsAPI = {
 
     getTopTopics: async (limit = 10) => {
         return apiFetch(`/analytics/top-topics?limit=${limit}`);
+    },
+
+    getFeedbackSentiment: async () => {
+        return apiFetch('/analytics/feedback-sentiment');
     },
 };
 

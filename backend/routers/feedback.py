@@ -75,7 +75,7 @@ async def get_all_feedback(
         raise HTTPException(status_code=403, detail="Only admins can view all feedback")
     try:
         sb = get_supabase()
-        q = sb.table("feedback").select("*, users!sender_id(name, institution_id, avatar)")
+        q = sb.table("feedback").select("*, users!sender_id(name, institution_id, avatar, profile_image_url)")
         if status:
             q = q.eq("status", status)
         resp = q.order("created_at", desc=True).execute()
@@ -85,7 +85,7 @@ async def get_all_feedback(
             sender = row.pop("users", None) or {}
             row["sender_name"] = sender.get("name", "Unknown")
             row["sender_institution_id"] = sender.get("institution_id", "Unknown")
-            row["sender_avatar"] = sender.get("avatar", "male")
+            row["sender_avatar"] = sender.get("profile_image_url") or sender.get("avatar", "male")
             results.append(row)
         return results
     except Exception as e:

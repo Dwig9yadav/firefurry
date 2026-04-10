@@ -67,6 +67,8 @@ const StudentDashboard = () => {
   const [userName, setUserName] = useState(''); // Display name
   const [editName, setEditName] = useState(''); // Name being edited
   const [selectedAvatar, setSelectedAvatar] = useState('male'); // Avatar selection
+  const [profileImageUrl, setProfileImageUrl] = useState(''); // Custom uploaded profile image URL
+  const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
 
   // --- Buddies system ---
   const [buddies, setBuddies] = useState([]); // List of buddies
@@ -124,6 +126,7 @@ const StudentDashboard = () => {
       setUserName(user.name);
       setEditName(user.name);
       setSelectedAvatar(user.avatar || 'male');
+      setProfileImageUrl(user.profile_image_url || '');
 
       // Load all data independently
       setLoadingRecommendations(true);
@@ -192,6 +195,46 @@ const StudentDashboard = () => {
   const handleLogout = () => {
     authAPI.logout();
     navigate('/');
+  };
+
+  const handleProfileImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxBytes = 5 * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+      setOperationStatus('Only JPG, PNG, and WEBP images are supported.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > maxBytes) {
+      setOperationStatus('Image must be 5MB or smaller.');
+      event.target.value = '';
+      return;
+    }
+
+    setUploadingProfileImage(true);
+    try {
+      const response = await usersAPI.uploadProfileImage(currentUser.id, file);
+      const uploadedImageUrl = response?.profile_image_url || '';
+      const nextUser = {
+        ...currentUser,
+        profile_image_url: uploadedImageUrl,
+      };
+
+      setProfileImageUrl(uploadedImageUrl);
+      setCurrentUser(nextUser);
+      authAPI.setCurrentUser(nextUser);
+      setOperationStatus('Profile image uploaded successfully.');
+    } catch (error) {
+      handleError(error, 'Failed to upload profile image.');
+    } finally {
+      setUploadingProfileImage(false);
+      event.target.value = '';
+    }
   };
 
   /**
@@ -361,7 +404,7 @@ const StudentDashboard = () => {
         <div className="sidebar-footer">
           <div className="user-profile">
             <img
-              src={getAvatarSrc(selectedAvatar)}
+              src={getAvatarSrc(profileImageUrl || selectedAvatar)}
               alt={selectedAvatar}
               className="avatar-image"
               onError={handleAvatarError}
@@ -420,6 +463,28 @@ const StudentDashboard = () => {
                   </button>
                 </div>
               </div>
+
+              <div className="form-group-modal">
+                <label>Or Upload Profile Image</label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleProfileImageUpload}
+                  className="profile-image-upload-input"
+                  disabled={uploadingProfileImage}
+                />
+                <p className="profile-upload-hint">
+                  {uploadingProfileImage ? 'Uploading image...' : 'JPG, PNG, WEBP up to 5MB.'}
+                </p>
+                {profileImageUrl && (
+                  <img
+                    src={getAvatarSrc(profileImageUrl)}
+                    alt="Profile Preview"
+                    className="uploaded-profile-preview"
+                    onError={handleAvatarError}
+                  />
+                )}
+              </div>
             </div>
 
             <div className="profile-modal-buttons">
@@ -427,12 +492,19 @@ const StudentDashboard = () => {
                 className="save-profile-btn"
                 onClick={async () => {
                   try {
-                    await usersAPI.update(currentUser.id, {
+                    const response = await usersAPI.update(currentUser.id, {
                       name: editName,
                       avatar: selectedAvatar
                     });
-                    setUserName(editName);
-                    setCurrentUser({ ...currentUser, name: editName, avatar: selectedAvatar });
+                    const updatedUser = response?.user || {
+                      ...currentUser,
+                      name: editName,
+                      avatar: selectedAvatar,
+                      profile_image_url: profileImageUrl,
+                    };
+                    setUserName(updatedUser.name);
+                    setCurrentUser(updatedUser);
+                    authAPI.setCurrentUser(updatedUser);
                   } catch (err) {
                     handleError(err, 'Failed to update profile');
                   }
@@ -445,6 +517,8 @@ const StudentDashboard = () => {
                 className="close-modal-btn"
                 onClick={() => {
                   setEditName(userName);
+                  setSelectedAvatar(currentUser?.avatar || 'male');
+                  setProfileImageUrl(currentUser?.profile_image_url || '');
                   setShowProfileModal(false);
                 }}
               >
@@ -569,7 +643,7 @@ const StudentDashboard = () => {
                 {filteredBuddies.length > 0 ? filteredBuddies.map((buddy) => (
                   <div key={buddy.id} className="buddy-card">
                     <img
-                      src={getAvatarSrc(buddy.avatar)}
+                      src={getAvatarSrc(buddy.profile_image_url || buddy.avatar)}
                       alt={buddy.avatar || 'male'}
                       className="buddy-avatar-img"
                       onError={handleAvatarError}

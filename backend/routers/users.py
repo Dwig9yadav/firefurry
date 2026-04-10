@@ -5,15 +5,23 @@ Users Router for MINI-RAG Backend
 Provides endpoints for user management, including listing users, updating profiles, and filtering by role or status.
 All user data is stored and queried from Supabase.
 """
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import Optional
+from uuid import uuid4
 
 from models import UserUpdate
-from database import get_supabase
+from database import get_supabase, SUPABASE_URL
 from routers.auth import get_current_user
 from core.rbac import require_roles, require_self_or_roles
 
 router = APIRouter()
+
+ALLOWED_IMAGE_TYPES = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+}
+MAX_PROFILE_IMAGE_BYTES = 5 * 1024 * 1024
 
 
 # ---------------------------------------------------------------------------
@@ -28,7 +36,7 @@ async def get_all_users(
 ):
     try:
         sb = get_supabase()
-        q = sb.table("users").select("id, name, institution_id, email, role, avatar, status, created_at")
+        q = sb.table("users").select("id, name, institution_id, email, role, avatar, profile_image_url, status, created_at")
         if role:
             q = q.eq("role", role)
         if status:
@@ -43,7 +51,7 @@ async def get_all_users(
 async def get_students(current_user: dict = Depends(require_roles("admin", "teacher", "student"))):
     try:
         sb = get_supabase()
-        resp = sb.table("users").select("id, name, institution_id, email, avatar, status").eq("role", "student").execute()
+        resp = sb.table("users").select("id, name, institution_id, email, avatar, profile_image_url, status").eq("role", "student").execute()
         return resp.data or []
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -53,7 +61,7 @@ async def get_students(current_user: dict = Depends(require_roles("admin", "teac
 async def get_teachers(current_user: dict = Depends(require_roles("admin", "teacher", "student"))):
     try:
         sb = get_supabase()
-        resp = sb.table("users").select("id, name, institution_id, email, avatar, status").eq("role", "teacher").execute()
+        resp = sb.table("users").select("id, name, institution_id, email, avatar, profile_image_url, status").eq("role", "teacher").execute()
         return resp.data or []
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -94,6 +102,58 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
     return current_user
 
 
+@router.post("/{user_id}/profile-image")
+async def upload_profile_image(
+    user_id: int,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+):
+    require_self_or_roles("admin")(current_user, user_id)
+
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail="Unsupported image type. Use JPG, PNG, or WEBP.")
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+    if len(content) > MAX_PROFILE_IMAGE_BYTES:
+        raise HTTPException(status_code=400, detail="Image size must be 5MB or less")
+
+    if not SUPABASE_URL:
+        raise HTTPException(status_code=500, detail="Supabase URL is not configured")
+
+    try:
+        sb = get_supabase()
+
+        try:
+            sb.storage.get_bucket("avatars")
+        except Exception:
+            sb.storage.create_bucket("avatars", {"public": True})
+
+        extension = ALLOWED_IMAGE_TYPES[file.content_type]
+        storage_path = f"users/{user_id}/{uuid4().hex}.{extension}"
+        sb.storage.from_("avatars").upload(
+            storage_path,
+            file=content,
+            file_options={"content-type": file.content_type},
+        )
+
+        public_url = f"{SUPABASE_URL.rstrip('/')}/storage/v1/object/public/avatars/{storage_path}"
+        updated = sb.table("users").update({"profile_image_url": public_url}).eq("id", user_id).execute()
+        if not updated.data:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return {
+            "message": "Profile image uploaded successfully",
+            "profile_image_url": public_url,
+            "user": updated.data[0],
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ---------------------------------------------------------------------------
 # Single user
 # ---------------------------------------------------------------------------
@@ -102,7 +162,7 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
 async def get_user(user_id: int, current_user: dict = Depends(require_roles("admin", "teacher", "student"))):
     try:
         sb = get_supabase()
-        resp = sb.table("users").select("id, name, institution_id, email, role, avatar, status, created_at").eq("id", user_id).limit(1).execute()
+        resp = sb.table("users").select("id, name, institution_id, email, role, avatar, profile_image_url, status, created_at").eq("id", user_id).limit(1).execute()
         if not resp.data:
             raise HTTPException(status_code=404, detail="User not found")
         return resp.data[0]

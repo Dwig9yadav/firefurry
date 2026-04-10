@@ -819,6 +819,30 @@
   color: white;
 }
 
+.profile-image-upload-input {
+  width: 100%;
+  padding: 0.625rem;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 0.5rem;
+  background: rgba(148, 163, 184, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.profile-upload-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.uploaded-profile-preview {
+  margin-top: 0.75rem;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 217, 255, 0.45);
+}
+
 /* Modal Buttons */
 .profile-modal-buttons {
   display: flex;

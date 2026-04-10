@@ -168,6 +168,7 @@ export const authAPI = {
     },
 
     getCurrentUser: () => getUser(),
+    setCurrentUser: (user) => setUser(user),
     isAuthenticated: () => !!getToken(),
 };
 
@@ -192,6 +193,45 @@ export const usersAPI = {
             method: 'PATCH',
             body: JSON.stringify(updates),
         });
+    },
+
+    uploadProfileImage: async (userId, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = getToken();
+        const candidates = getApiCandidates();
+        let lastError = null;
+
+        for (let index = 0; index < candidates.length; index++) {
+            const baseUrl = candidates[index];
+            const isLastCandidate = index === candidates.length - 1;
+
+            try {
+                const response = await fetch(`${baseUrl}/users/${userId}/profile-image`, {
+                    method: 'POST',
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    body: formData,
+                });
+
+                const { data, isLikelyHtml } = await parseResponseBody(response);
+                if (isLikelyHtml && !isLastCandidate) {
+                    continue;
+                }
+
+                if (!response.ok) {
+                    const detail = data && typeof data === 'object' ? data.detail : null;
+                    throw new Error(detail || `Upload failed (${response.status})`);
+                }
+
+                return data;
+            } catch (error) {
+                lastError = error;
+                if (!isLastCandidate) continue;
+            }
+        }
+
+        throw lastError || new Error('Upload failed. Backend may be unavailable.');
     },
 
     updateRole: async (userId, newRole) => {

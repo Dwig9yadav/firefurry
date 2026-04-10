@@ -15,10 +15,13 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     role          VARCHAR(20)  DEFAULT 'student'  CHECK (role   IN ('student','teacher','admin')),
     avatar        VARCHAR(20)  DEFAULT 'male'     CHECK (avatar IN ('male','female')),
-    status        VARCHAR(20)  DEFAULT 'active'   CHECK (status IN ('active','inactive')),
+    profile_image_url TEXT,
+    status        VARCHAR(20)  DEFAULT 'active'   CHECK (status IN ('active','inactive','pending_verification')),
     created_at    TIMESTAMPTZ  DEFAULT NOW(),
     updated_at    TIMESTAMPTZ  DEFAULT NOW()
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_url TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_users_institution_id ON users(institution_id);
 CREATE INDEX IF NOT EXISTS idx_users_email          ON users(email);
@@ -157,3 +160,12 @@ CREATE POLICY "Service role storage access"
 ON storage.objects FOR ALL
 USING (bucket_id = 'pdfs')
 WITH CHECK (bucket_id = 'pdfs');
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Service role storage access avatars"
+ON storage.objects FOR ALL
+USING (bucket_id = 'avatars')
+WITH CHECK (bucket_id = 'avatars');

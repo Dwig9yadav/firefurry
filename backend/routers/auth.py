@@ -82,6 +82,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 "email": user.get("email") or "",
                 "role": user["role"],
                 "avatar": user.get("avatar", "male"),
+                "profile_image_url": user.get("profile_image_url"),
                 "status": user.get("status", "active"),
             }
         return {
@@ -141,6 +142,11 @@ async def register(user_data: UserRegister):
             "status": initial_status,
         }
         resp = sb.table("users").insert(row).execute()
+        if not resp.data:
+            raise HTTPException(
+                status_code=502,
+                detail="User registration succeeded but Supabase returned no row. Check the users table response settings.",
+            )
         new_user = resp.data[0]
 
         if EMAIL_VERIFICATION_REQUIRED and (new_user.get("email") or ""):
@@ -155,6 +161,7 @@ async def register(user_data: UserRegister):
                     "email": new_user.get("email") or "",
                     "role": new_user["role"],
                     "avatar": new_user.get("avatar", "male"),
+                    "profile_image_url": new_user.get("profile_image_url"),
                     "status": new_user.get("status", "pending_verification"),
                 },
                 requires_verification=True,
@@ -179,6 +186,7 @@ async def register(user_data: UserRegister):
                 "email": new_user.get("email") or "",
                 "role": new_user["role"],
                 "avatar": new_user.get("avatar", "male"),
+                "profile_image_url": new_user.get("profile_image_url"),
             },
         )
     except HTTPException:
@@ -218,6 +226,7 @@ async def login(user_data: UserLogin):
                 "email": user.get("email") or "",
                 "role": user["role"],
                 "avatar": user.get("avatar", "male"),
+                "profile_image_url": user.get("profile_image_url"),
             },
         )
     except HTTPException:
